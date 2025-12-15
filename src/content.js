@@ -30,7 +30,8 @@ function handleMutation(mutations) {
 
 setInterval(() => {
     const top = document.getElementById('gs_top');
-    if (top && !top.dataset.processed) {
+    // FIX: Check if we missed the rows even if processed (content might be wiped)
+    if (top && (!top.dataset.processed || !top.querySelector('.gs-ext-row'))) {
         processTop(top);
     }
 }, 500);
@@ -48,11 +49,17 @@ function processModal(modal) {
 }
 
 function processTop(container) {
-    // Basic guard: if we marked it processed, stop, unless we missed the rows (paranoid check)
-    if (container.dataset.processed) {
+    // 0. Re-entrancy guard
+    if (container.dataset.processing === "true") return;
+
+    // 1. Basic guard: if we marked it processed AND it still has rows, stop.
+    if (container.dataset.processed === "true") {
         if (container.querySelector('.gs-ext-row')) return;
-        // If processed but no rows, maybe retry?
+        // If processed but no rows, we must proceed (reset happened).
+        log("Processed flag true but rows missing. Re-injecting...");
     }
+
+    container.dataset.processing = "true";
 
     // Wait for text "APA" to be present
     const checkStart = Date.now();
@@ -61,6 +68,7 @@ function processTop(container) {
         if (container.querySelector('.gs-ext-row')) {
             clearInterval(check);
             container.dataset.processed = "true";
+            container.dataset.processing = "false";
             return;
         }
 
@@ -68,10 +76,13 @@ function processTop(container) {
 
         if (apaEl) {
             clearInterval(check);
-            container.dataset.processed = "true";
+            // reset processing flag first or inside inject
             injectCitations(container, apaEl);
+            container.dataset.processed = "true";
+            container.dataset.processing = "false";
         } else if (Date.now() - checkStart > 3000) {
             clearInterval(check); // Timeout
+            container.dataset.processing = "false";
         }
     }, 100);
 }
