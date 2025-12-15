@@ -1,0 +1,41 @@
+{
+  "manifest_version": 3,
+  "name": "Google Scholar IEEE/ACM Citation",
+  "version": "1.4",
+  "description": "Adds IEEE and ACM citation formats to Google Scholar's Cite modal.",
+  "permissions": [
+    "clipboardWrite"
+  ],
+  "host_permissions": [
+    "*://scholar.google.com/*",
+    "*://scholar.google.com.tw/*",
+    "*://scholar.googleusercontent.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "*://scholar.google.com/*",
+        "*://scholar.google.com.tw/*",
+        "*://scholar.google.co.uk/*",
+        "*://scholar.google.co.jp/*",
+        "*://scholar.google.de/*",
+        "*://scholar.google.fr/*"
+      ],
+      "js": [
+        "src/bibtex_parser.js",
+        "src/reference_parser.js",
+        "src/citation_formatter.js",
+        "src/content.js"
+      ],
+      "css": [
+        "src/styles.css"
+      ],
+      "run_at": "document_end"
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

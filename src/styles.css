@@ -1,0 +1,15 @@
+.gs-ext-copy-btn {
+  /* Kept for compatibility if old logic runs, but currently using inline 'a' tag style in JS */
+  margin-left: 10px;
+  font-size: 11px;
+  cursor: pointer;
+  color: #1a0dab;
+  border: none;
+  background: none;
+}
+
+.gs-ext-generated th.gs_cith {
+  text-align: right !important;
+  vertical-align: top;
+  padding-right: 15px;
+}
