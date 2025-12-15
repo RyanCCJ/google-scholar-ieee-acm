@@ -31,10 +31,6 @@ This extension is built with **Manifest V3**.
 3.  Click the quotation mark symbol (**Cite**) under the result.
 4.  You will see **IEEE** and **ACM** appear in the list!
 
-## Structure
+## License
 
-- `manifest.json`: Extension configuration (MV3).
-- `src/content.js`: Main logic. Detects the modal and injects the new rows using a robust anchor-based strategy.
-- `src/reference_parser.js`: Parses metadata (Authors, Title, Year, etc.) from the existing APA/MLA text.
-- `src/citation_formatter.js`: Formats the data into standard IEEE/ACM strings.
-- `src/styles.css`: CSS for alignment and dark mode tweaks.
+MIT License
