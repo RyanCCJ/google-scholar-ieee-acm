@@ -2,16 +2,14 @@
 
 A lightweight Chrome Extension that adds **IEEE** and **ACM** citation formats directly to the Google Scholar "Cite" modal.
 
-![Icon](icons/icon128.png)
+![preview](preview.png)
 
 ## Features
 
-- **⚡ Instant Injection**: Automatically adds "IEEE" and "ACM" rows to the citation modal.
-- **🔒 Privacy-Focused & Robust**: Uses local parsing of APA/MLA data directly from the screen. Zero external API calls, meaning no 403 errors or CAPTCHA blocks.
-- **📋 One-Click Copy**: Includes a convenient `[Copy]` button for quick usage.
-- **🎨 Native UI**: Perfectly aligns with Google Scholar's existing table layout (`tr`/`th`/`td`) for a seamless look.
-- **🌑 Dark Mode Friendly**: Includes specific icons and styles that look great in dark themes.
-- **🌏 Region Support**: Works on `scholar.google.com`, `scholar.google.com.tw`, and other regional domains.
+- **Instant Injection**: Automatically adds "IEEE" and "ACM" rows to the citation modal.
+- **Global Copy Buttons**: Adds a convenient `[Copy]` button to **ALL** standard formats (APA, MLA, Chicago, Harvard, Vancouver, etc.) and the new IEEE/ACM rows.
+- **Privacy-Focused & Robust**: Uses local parsing of APA/MLA data directly from the screen. Zero external API calls, meaning no 403 errors or CAPTCHA blocks.
+- **Native UI**: Perfectly aligns with Google Scholar's existing table layout (`tr`/`th`/`td`) for a seamless look.
 
 ## Installation
 

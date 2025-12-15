@@ -52,10 +52,15 @@ const ReferenceParser = {
                 return s.endsWith('.') ? s : s + '.';
             });
 
-            const authors = authorStrings.map(s => {
-                // s is like "LeCun, Y." or "Hinton, G."
-                return s.trim();
-            });
+            const authors = [];
+            for (let s of authorStrings) {
+                // Check for ellipsis (Scholar uses "...")
+                if (s.includes("...")) {
+                    authors.push("et al.");
+                    break;
+                }
+                authors.push(s.trim());
+            }
 
             // Rest: Title. Journal, ...
             const rest = text.substring(yearIndex + yearMatch[0].length).trim();

@@ -13,6 +13,8 @@ const CitationFormatter = {
         // 1. "Last, First Middle" -> "F. M. Last"
         // 2. "First Middle Last" -> "F. M. Last"
 
+        if (authorName === "et al.") return "et al.";
+
         let parts = authorName.split(',');
         let first = "";
         let last = "";
@@ -39,6 +41,7 @@ const CitationFormatter = {
      * Formats author names for ACM (First Last).
      */
     formatACMAuthor: (authorName) => {
+        if (authorName === "et al.") return "et al.";
         let parts = authorName.split(',');
         if (parts.length === 2) {
             return `${parts[1].trim()} ${parts[0].trim()}`;
@@ -54,6 +57,15 @@ const CitationFormatter = {
     formatAuthorList: (authors, formatter) => {
         if (!authors || authors.length === 0) return "";
         const formatted = authors.map(formatter);
+
+        // Check for et al.
+        const hasEtAl = formatted[formatted.length - 1] === "et al.";
+        if (hasEtAl) {
+            if (formatted.length === 1) return "et al."; // Should not happen usually
+            // "A, B, et al." not "A, B, and et al."
+            return `${formatted.slice(0, -1).join(", ")}, et al.`;
+        }
+
         if (formatted.length === 1) return formatted[0];
         if (formatted.length === 2) return `${formatted[0]} and ${formatted[1]}`;
         return `${formatted.slice(0, -1).join(", ")}, and ${formatted[formatted.length - 1]}`;

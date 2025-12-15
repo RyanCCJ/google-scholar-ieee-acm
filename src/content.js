@@ -98,7 +98,6 @@ function findElementWithText(container, text) {
 
 function injectCitations(container, anchorElement) {
     // 1. Strict Idempotency Check
-    // Check if we already injected into this specific container or anywhere inside it
     if (container.querySelector('.gs-ext-row')) {
         log("Already injected.");
         return;
@@ -119,7 +118,7 @@ function injectCitations(container, anchorElement) {
 
     const parentContainer = currentRow.parentElement; // This is tbody or table
 
-    // 2. Second Check on the parent itself (just in case multiple containers confuse us)
+    // 2. Second Check on the parent itself
     if (parentContainer.querySelector('.gs-ext-row')) {
         log("Parent already has rows.");
         return;
@@ -130,7 +129,13 @@ function injectCitations(container, anchorElement) {
 
     const bibtexEl = findElementWithText(container, "BibTeX");
     let exportRow = null;
+    let bibtexUrl = null;
+
     if (bibtexEl) {
+        // Extract URL
+        const anchor = bibtexEl.closest('a');
+        if (anchor) bibtexUrl = anchor.href;
+
         let bRow = bibtexEl;
         while (bRow && bRow.tagName !== 'TR') bRow = bRow.parentElement;
         if (bRow && parentContainer.contains(bRow)) exportRow = bRow;
@@ -144,6 +149,17 @@ function injectCitations(container, anchorElement) {
         parentContainer.appendChild(acmRow);
     }
 
+    // Helper to add copy buttons to all rows
+    const applyCopyButtonsToAll = () => {
+        const allRows = parentContainer.querySelectorAll('tr');
+        allRows.forEach(row => {
+            addCopyButtonToRow(row);
+        });
+    };
+
+    // Main Logic: Use ReferenceParser (Screen Scraping)
+    // User requested to remove BibTeX fetch due to 403 reliability issues.
+    log("Using direct parsing (no BibTeX fetch).");
     const formats = extractFormats(parentContainer);
 
     if (typeof ReferenceParser === 'undefined' || typeof CitationFormatter === 'undefined') {
@@ -164,6 +180,8 @@ function injectCitations(container, anchorElement) {
 
     updateNativeRow(ieeeRow, ieeeText, true);
     updateNativeRow(acmRow, acmText, true);
+
+    applyCopyButtonsToAll();
     log("Injected successfully.");
 }
 
@@ -213,24 +231,60 @@ function createNativeRow(title, content) {
 function updateNativeRow(tr, text, enableCopy = false) {
     const div = tr.querySelector('.gs_citr');
     if (!div) return;
-    div.textContent = text;
+    // Only update text if provided
+    if (text !== null) {
+        div.textContent = text;
+    }
 
     if (enableCopy) {
-        const copyBtn = document.createElement('a');
-        copyBtn.href = "javascript:void(0)";
-        copyBtn.textContent = "[Copy]";
-        copyBtn.style.marginLeft = "8px";
-        copyBtn.style.fontSize = "11px";
-        copyBtn.style.textDecoration = "none";
-        copyBtn.style.color = "#1a0dab";
-
-        copyBtn.onclick = (e) => {
-            e.preventDefault();
-            navigator.clipboard.writeText(text).then(() => {
-                copyBtn.textContent = "[Copied!]";
-                setTimeout(() => { copyBtn.textContent = "[Copy]"; }, 2000);
-            });
-        };
-        div.appendChild(copyBtn);
+        addCopyButtonToRow(tr);
     }
+}
+
+function addCopyButtonToRow(tr) {
+    const div = tr.querySelector('.gs_citr');
+    if (!div) return;
+
+    // Check if button already exists
+    if (div.querySelector('.gs-ext-copy-btn')) return;
+
+    // The text to copy should be the content of the div *before* adding the button.
+    // We need to clone the div and remove the button if it exists, or get the text content
+    // of the first child node if it's just text.
+    // A more robust way is to clone the div, remove any existing copy button, then get textContent.
+    const clone = div.cloneNode(true);
+    const existingBtn = clone.querySelector('.gs-ext-copy-btn');
+    if (existingBtn) existingBtn.remove();
+    const textToCopy = clone.textContent.trim();
+
+    const copyBtn = document.createElement('a');
+    copyBtn.href = "javascript:void(0)";
+    copyBtn.className = "gs-ext-copy-btn"; // Marker class
+    copyBtn.textContent = "[Copy]";
+    copyBtn.style.marginLeft = "8px";
+    copyBtn.style.fontSize = "11px";
+    copyBtn.style.textDecoration = "none";
+    copyBtn.style.color = "#1a0dab";
+
+    copyBtn.onclick = (e) => {
+        e.preventDefault();
+        // Get text excluding the button itself?
+        // Cloning the node and removing children?
+        // Or simply:
+        let cleanText = div.childNodes[0].nodeValue;
+        // Usually text is the first child node if simple.
+        // But what if there are italics (<i>)? APA often has italics.
+        // textContent returns all text.
+        // clone and remove specific class?
+        const clone = div.cloneNode(true);
+        const btn = clone.querySelector('.gs-ext-copy-btn');
+        if (btn) btn.remove();
+        cleanText = clone.textContent.trim();
+
+        navigator.clipboard.writeText(cleanText).then(() => {
+            copyBtn.textContent = "[Copied!]";
+            setTimeout(() => { copyBtn.textContent = "[Copy]"; }, 2000);
+        });
+    };
+    div.appendChild(copyBtn);
 }
