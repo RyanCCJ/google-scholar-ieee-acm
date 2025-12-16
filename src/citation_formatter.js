@@ -76,15 +76,21 @@ const CitationFormatter = {
         // Template:
         // [Authors], "Title," in [Venue], [Year], pp. [Pages].
 
-        const authors = CitationFormatter.formatAuthorList(data.authors, CitationFormatter.formatIEEEAuthor);
+        let authors = CitationFormatter.formatAuthorList(data.authors, CitationFormatter.formatIEEEAuthor);
+        if (authors) authors += ","; // IEEE requires comma after authors
+
         const title = data.title ? `"${data.title},"` : "";
         let venue = "";
         if (data.journal) venue = `in ${data.journal}`;
         else if (data.booktitle) venue = `in ${data.booktitle}`; // Conference
 
         // IEEE standard abbreviations often used, but we use what we have.
-        // If venue exists, add comma
-        if (venue) venue += ",";
+        // If venue exists, add comma. 
+        // Fix: Strip trailing period if present before adding comma (e.g. "Proc. 30." -> "Proc. 30,")
+        if (venue) {
+            if (venue.endsWith('.')) venue = venue.slice(0, -1);
+            venue += ",";
+        }
 
         const year = data.year ? `${data.year}` : "";
 
@@ -98,7 +104,13 @@ const CitationFormatter = {
         // IEEE: A. B. Author, "Title," in Venue, Year, pp. 1-10.
 
         let parts = [authors, title, venue, year, pages];
-        return parts.filter(p => p).join(" ");
+        let result = parts.filter(p => p).join(" ");
+
+        // Ensure strictly one period at the end
+        if (result && !result.endsWith('.')) {
+            result += ".";
+        }
+        return result;
     },
 
     toACM: (data) => {
@@ -122,7 +134,11 @@ const CitationFormatter = {
         // Combine venue and pages if feasible
         let container = venue;
         if (pages && container) container += `, ${pages}`;
-        if (container) container += ".";
+
+        // Fix: Double period check
+        if (container && !container.endsWith('.')) {
+            container += ".";
+        }
 
         return [authors, year, title, container].filter(x => x).join(" ");
     }
